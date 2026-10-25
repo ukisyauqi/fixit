@@ -1,6 +1,7 @@
 # API_CONTRACT — fixit backend
 
 Base URL: `http://localhost:3000` (`PORT` di env, default `3000`).
+Deploy produksi: `https://fixit-3eas.onrender.com` (Render inject `PORT` sendiri, dibaca via `config.port` — jangan hardcode `3000`).
 Semua path di bawah sesuai implementasi di `src/app.ts`, `src/routes/*`, `src/schemas.ts`.
 
 ## Konvensi global
@@ -63,6 +64,7 @@ Urutan normal: `delta*` → `tool*` → `done` (sekali). `done`/`error` hanya di
 - Dengan `sessionId` yang sudah ada di `Map` → pakai lagi, `lastSeen = now`.
 - Idle > `SESSION_TTL_MS` (default 30 mnt) → `evictIdle()` tiap 5 mnt (`src/index.ts`) → `dispose()` + hapus dari `Map` + hapus folder `workspace/<id>/` (matikan via `CLEANUP_WORKSPACE_ON_EVICT=false`).
 - Timeout satu prompt: `PROMPT_TIMEOUT_MS` (default 120000) → `session.abort()` → `event: error { code: "TIMEOUT" }`.
+- Idle koneksi SSE: `Bun.serve({ idleTimeout })` di `src/index.ts` = `promptTimeoutMs/1000 + 30` dtk (maks 255, default Bun cuma 10 dtk). Tanpa ini stream idle (model lama mikir) diputus server → proxy balas `502` kosong.
 - Client disconnect (`request.signal` / `stream.onAbort`) → `unsubscribe() + session.abort()`, **tanpa** `dispose()` yang persistent.
 
 ### Concurrency
